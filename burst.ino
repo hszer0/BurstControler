@@ -4,7 +4,7 @@
 #define motorPin 6
 
 int shotDelay = 250;
-int busrtCount = 3;
+int burstCount = 3;
 int shotCount = 0;
 int bbCount = 0;
 int bbMax = 120;

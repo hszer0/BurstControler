@@ -58,7 +58,7 @@ void loop()
 		if(!digitalRead(gearPin) && !cycleFinished)
 		{
 			shotCount++;
-			if(shotCount >= 3)
+			if(shotCount >= burstCount)
 			{
 				digitalWrite(motorPin, LOW);
 				previousTime = currentTime;

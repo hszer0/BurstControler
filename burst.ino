@@ -17,78 +17,78 @@ long lastGearTime = 0;
 long debounceDelay = 50;  
 long debounceDelayGear = 5;
 
-
 void setup()
 {
-  pinMode(triggerPin, INPUT_PULLUP);
-  pinMode(selectorPin, INPUT_PULLUP);
-  pinMode(gearPin, INPUT_PULLUP);
-  pinMode(motorPin, OUTPUT);
-  lastGearState = digitalRead(gearPin);
-  lastTriggerState = digitalRead(triggerPin);
+    pinMode(triggerPin, INPUT_PULLUP);
+    pinMode(selectorPin, INPUT_PULLUP);
+    pinMode(gearPin, INPUT_PULLUP);
+    pinMode(motorPin, OUTPUT);
+    lastGearState = digitalRead(gearPin);
+    lastTriggerState = digitalRead(triggerPin);
 }
 
 
 void loop() 
 {
-  int gearReading = digitalRead(gearPin);
-  int triggerReading = digitalRead(triggerPin);
+    int gearReading = digitalRead(gearPin);
+    int triggerReading = digitalRead(triggerPin);
   
-  if (gearReading != lastGearState)
-  {
-    lastGearTime = millis();
-  }
-  
-  if ((millis() - lastGearTime) > debounceDelayGear) 
-  {
-    if (gearReading != gearState) {
-      gearState = gearReading;
-    }
-    
-  }
-    
-  if (triggerReading != lastTriggerState)
-  {
-    lastTriggerTime = millis();
-  }
-  
-  if ((millis() - lastTriggerTime) > debounceDelay) 
-  {
-    if (triggerReading != triggerState) {
-      triggerState = triggerReading;
-    } 
-  }
-  
-  if (gearState)
-  {
-   ignoreGear = 0; 
-  }
-  
-  if (!ignoreTrigger and !triggerState)
-  {
-    runMotor = 1;
-    ignoreTrigger = 1;
-  }
-
-  if (!gearState and !ignoreGear)
-  {
-    runMotor = 0;
-    if (triggerState)
+    if (gearReading != lastGearState)
     {
-      ignoreTrigger = 0;
-      ignoreGear = 1;
+        lastGearTime = millis();
     }
-  }
-  else
-  {
-    if (triggerState)
-    {
-      ignoreTrigger = 0; 
-    }
-  }
 
-  digitalWrite(motorPin, runMotor);
-  digitalWrite(ledPin, runMotor);
-  lastTriggerState = triggerReading;
-  lastGearState = gearReading;
+    if ((millis() - lastGearTime) > debounceDelayGear) 
+    {
+        if (gearReading != gearState) 
+        {
+            gearState = gearReading;
+        }
+    }
+
+    if (triggerReading != lastTriggerState)
+    {
+        lastTriggerTime = millis();
+    }
+
+    if ((millis() - lastTriggerTime) > debounceDelay) 
+    {
+        if (triggerReading != triggerState) 
+        {
+            triggerState = triggerReading;
+        } 
+    }
+
+    if (gearState)
+    {
+       ignoreGear = 0; 
+    }
+
+    if (!ignoreTrigger and !triggerState)
+    {
+        runMotor = 1;
+        ignoreTrigger = 1;
+    }
+
+    if (!gearState and !ignoreGear)
+    {
+        runMotor = 0;
+        if (triggerState)
+        {
+            ignoreTrigger = 0;
+            ignoreGear = 1;
+        }
+    }
+    else
+    {
+        if (triggerState)
+        {
+            ignoreTrigger = 0; 
+        }
+    }
+
+    digitalWrite(motorPin, runMotor);
+    digitalWrite(ledPin, runMotor);
+    lastTriggerState = triggerReading;
+    lastGearState = gearReading;
 }

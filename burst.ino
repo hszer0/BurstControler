@@ -11,7 +11,7 @@ int lastGearState = 0;
 int lastTriggerState = 0;
 int gearState;
 int triggerState = 1;
-int globalShots = 0;
+int shotState = 0;
 
 long lastTriggerTime = 0;
 long lastGearTime = 0;
@@ -67,20 +67,20 @@ void burstFire(int maxShots)
     {
         // start motor and stop watching the trigger
         runMotor = 1;
-        globalShots = 0;
+        shotState = 0;
         ignoreTrigger = 1;
     }
 
     // if gear is detected and not ignored
     if (!gearState and !ignoreGear)
     {
-        globalShots++;
+        shotState++;
 
-        if (globalShots >= maxShots)
+        if (shotState >= maxShots)
         {
             // stop the motor
             runMotor = 0;
-            globalShots = 0;
+            shotState = 0;
 
             // if trigger is released
             if (triggerState)

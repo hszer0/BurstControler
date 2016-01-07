@@ -31,7 +31,14 @@ void setup()
 
 void loop() 
 {
-    burstFire(1);
+    if (digitalRead(selectorPin))
+    {
+        burstFire(1);
+    }
+    else
+    {
+        burstFire(3);
+    }
 }
 
 void burstFire(int maxShots)

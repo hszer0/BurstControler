@@ -12,6 +12,7 @@ int lastTriggerState = 0;
 int gearState;
 int triggerState = 1;
 int shotState = 0;
+int shotCounter = 0;
 
 long lastTriggerTime = 0;
 long lastGearTime = 0;
@@ -75,6 +76,7 @@ void burstFire(int maxShots)
     if (!gearState and !ignoreGear)
     {
         shotState++;
+        shotCounter++;
 
         if (shotState >= maxShots)
         {

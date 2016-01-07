@@ -2,84 +2,93 @@
 #define selectorPin 4
 #define gearPin 5
 #define motorPin 6
+#define ledPin 13
 
-int shotDelay = 250;
-int burstCount = 3;
-int shotCount = 0;
-int bbCount = 0;
-int bbMax = 120;
-bool cycleFinished = 1;
-bool triggerAvailable = 1;
-long previousTime = 0;
+bool ignoreTrigger = 0;
+bool ignoreGear = 1;
+bool runMotor = 0;
+int lastGearState = 0;
+int lastTriggerState = 0;
+int gearState;
+int triggerState = 1;
+
+long lastTriggerTime = 0;
+long lastGearTime = 0;
+long debounceDelay = 50;  
+long debounceDelayGear = 5;
+
 
 void setup()
 {
-	pinMode(triggerPin, INPUT_PULLUP);
-	pinMode(selectorPin, INPUT_PULLUP);
-	pinMode(gearPin, INPUT_PULLUP);
-	pinMode(motorPin, OUTPUT);
-	bbCount = bbMax;
+  pinMode(triggerPin, INPUT_PULLUP);
+  pinMode(selectorPin, INPUT_PULLUP);
+  pinMode(gearPin, INPUT_PULLUP);
+  pinMode(motorPin, OUTPUT);
+  lastGearState = digitalRead(gearPin);
+  lastTriggerState = digitalRead(triggerPin);
 }
 
-void loop()
+
+void loop() 
 {
-	unsigned long currentTime = millis();
-	if (digitalRead(selectorPin))
-	{
-		if(!digitalRead(triggerPin) && cycleFinished && triggerAvailable)
-		{
-			digitalWrite(motorPin, HIGH);
-			cycleFinished = 0;
-			triggerAvailable = 0;
-		}
+  int gearReading = digitalRead(gearPin);
+  int triggerReading = digitalRead(triggerPin);
+  
+  if (gearReading != lastGearState)
+  {
+    lastGearTime = millis();
+  }
+  
+  if ((millis() - lastGearTime) > debounceDelayGear) 
+  {
+    if (gearReading != gearState) {
+      gearState = gearReading;
+    }
+    
+  }
+    
+  if (triggerReading != lastTriggerState)
+  {
+    lastTriggerTime = millis();
+  }
+  
+  if ((millis() - lastTriggerTime) > debounceDelay) 
+  {
+    if (triggerReading != triggerState) {
+      triggerState = triggerReading;
+    } 
+  }
+  
+  if (gearState)
+  {
+   ignoreGear = 0; 
+  }
+  
+  if (!ignoreTrigger and !triggerState)
+  {
+    runMotor = 1;
+    ignoreTrigger = 1;
+  }
 
-		if(!digitalRead(gearPin) && !cycleFinished)
-		{
-			digitalWrite(motorPin, LOW);
-			bbCount--;
-			cycleFinished = 1;
-		}
+  if (!gearState and !ignoreGear)
+  {
+    runMotor = 0;
+    if (triggerState)
+    {
+      ignoreTrigger = 0;
+      ignoreGear = 1;
+    }
+  }
+  else
+  {
+    if (triggerState)
+    {
+      ignoreTrigger = 0; 
+    }
+  }
 
-		if(digitalRead(triggerPin)
-		{
-			triggerAvailable = 1;
-		}
-	}
-	else
-	{
-		if(!digitalRead(triggerPin) && cycleFinished && triggerAvailable)
-		{
-			digitalWrite(motorPin, HIGH);
-			cycleFinished = 0;
-			triggerAvailable = 0;
-			shotCount = 0;
-		}
-
-		if(!digitalRead(gearPin) && !cycleFinished)
-		{
-			shotCount++;
-			if(shotCount >= burstCount)
-			{
-				digitalWrite(motorPin, LOW);
-				previousTime = currentTime;
-				if(!digitalRead(triggerPin))
-				{
-					if(currentTime - previousTime > shotDelay)
-					{
-						digitalWrite(motorPin, HIGH);
-					}
-					else
-					{
-						digitalWrite(motorPin, LOW);
-						cycleFinished = 1;
-					}
-				}
-			}
-		}
-
-		if(digitalRead(triggerPin)
-		{
-			triggerAvailable = 1;
-		}
-	}
+  digitalWrite(motorPin, runMotor);
+  digitalWrite(ledPin, runMotor);
+  lastTriggerState = triggerReading;
+  lastGearState = gearReading;
 }

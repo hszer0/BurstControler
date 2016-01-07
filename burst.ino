@@ -11,6 +11,7 @@ int lastGearState = 0;
 int lastTriggerState = 0;
 int gearState;
 int triggerState = 1;
+int globalShots = 0;
 
 long lastTriggerTime = 0;
 long lastGearTime = 0;
@@ -30,65 +31,69 @@ void setup()
 
 void loop() 
 {
-    int gearReading = digitalRead(gearPin);
-    int triggerReading = digitalRead(triggerPin);
-  
-    if (gearReading != lastGearState)
-    {
-        lastGearTime = millis();
-    }
+    burstFire(1);
+}
 
+void burstFire(int maxShots)
+{
+    // debounce gear
+    int gearReading = digitalRead(gearPin);
+    if (gearReading != lastGearState) lastGearTime = millis();
     if ((millis() - lastGearTime) > debounceDelayGear) 
     {
-        if (gearReading != gearState) 
-        {
-            gearState = gearReading;
-        }
+        if (gearReading != gearState) gearState = gearReading;
     }
 
-    if (triggerReading != lastTriggerState)
-    {
-        lastTriggerTime = millis();
-    }
-
+    // debounce trigger
+    int triggerReading = digitalRead(triggerPin);
+    if (triggerReading != lastTriggerState) lastTriggerTime = millis();
     if ((millis() - lastTriggerTime) > debounceDelay) 
     {
-        if (triggerReading != triggerState) 
-        {
-            triggerState = triggerReading;
-        } 
+        if (triggerReading != triggerState) triggerState = triggerReading; 
     }
 
-    if (gearState)
-    {
-       ignoreGear = 0; 
-    }
+    // if gear is not detected commence watching gear
+    if (gearState) ignoreGear = 0; 
 
+    // if trigger is held and is not ignored
     if (!ignoreTrigger and !triggerState)
     {
+        // start motor and stop watching the trigger
         runMotor = 1;
+        globalShots = 0;
         ignoreTrigger = 1;
     }
 
+    // if gear is detected and not ignored
     if (!gearState and !ignoreGear)
     {
-        runMotor = 0;
-        if (triggerState)
+        globalShots++;
+
+        if (globalShots >= maxShots)
         {
-            ignoreTrigger = 0;
-            ignoreGear = 1;
+            // stop the motor
+            runMotor = 0;
+            globalShots = 0;
+
+            // if trigger is released
+            if (triggerState)
+            {
+                // start watching the trigger and ignore the gear
+                ignoreTrigger = 0;
+                ignoreGear = 1;
+            }
         }
     }
-    else
+    else // in all other cases
     {
-        if (triggerState)
-        {
-            ignoreTrigger = 0; 
-        }
+        // if trigger is released
+        if (triggerState) ignoreTrigger = 0; 
     }
 
     digitalWrite(motorPin, runMotor);
     digitalWrite(ledPin, runMotor);
+
+    // debounce end
     lastTriggerState = triggerReading;
-    lastGearState = gearReading;
+    lastGearState = gearReading;   
 }

@@ -2,6 +2,7 @@
 #define selectorPin 4
 #define gearPin 5
 #define motorPin 6
+#define resetPin 7
 #define ledPin 13
 
 bool ignoreTrigger = 0;
@@ -32,6 +33,21 @@ void setup()
 
 void loop() 
 {
+    // debounce reset
+    int resetReading = digitalRead(resetPin);
+    if (resetReading != lastResetrState) lastResetTime = millis();
+    if ((millis() - lastResetTime) > debounceDelay) 
+    {
+        if (resetReading != resetState) resetState = resetReading;
+    }
+
+    if (!resetState)
+    {
+        shotCounter = 0;
+        shotState = 0;
+        runMotor = 0;
+    }
+
     if (digitalRead(selectorPin))
     {
         burstFire(1);
@@ -40,6 +56,8 @@ void loop()
     {
         burstFire(3);
     }
+
+    lastResetState = resetReading; 
 }
 
 void burstFire(int maxShots)

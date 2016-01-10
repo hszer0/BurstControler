@@ -8,6 +8,7 @@
 bool ignoreTrigger = 0;
 bool ignoreGear = 1;
 bool runMotor = 0;
+bool watchShots = 1;
 int lastGearState = 0;
 int lastTriggerState = 0;
 int gearState;
@@ -21,7 +22,7 @@ long lastGearTime = 0;
 long lastResetTime = 0;
 long lastResetState = 0;
 long debounceDelay = 50;  
-long debounceDelayGear = 5;
+long debounceDelayGear = 1;
 
 void setup()
 {
@@ -29,6 +30,7 @@ void setup()
     pinMode(selectorPin, INPUT_PULLUP);
     pinMode(gearPin, INPUT_PULLUP);
     pinMode(motorPin, OUTPUT);
+    pinMode(resetPin, INPUT_PULLUP);
     lastGearState = digitalRead(gearPin);
     lastTriggerState = digitalRead(triggerPin);
     lastResetState = digitalRead(resetPin);
@@ -48,8 +50,6 @@ void loop()
     if (!resetState)
     {
         shotCounter = 0;
-        shotState = 0;
-        runMotor = 0;
     }
 
     if (digitalRead(selectorPin))
@@ -83,7 +83,11 @@ void burstFire(int maxShots)
     }
 
     // if gear is not detected commence watching gear
-    if (gearState) ignoreGear = 0; 
+    if (gearState) 
+    {
+        ignoreGear = 0;
+        watchShots = 1;
+    } 
 
     // if trigger is held and is not ignored
     if (!ignoreTrigger and !triggerState)
@@ -91,14 +95,19 @@ void burstFire(int maxShots)
         // start motor and stop watching the trigger
         runMotor = 1;
         shotState = 0;
+        watchShots = 1;
         ignoreTrigger = 1;
     }
 
     // if gear is detected and not ignored
     if (!gearState and !ignoreGear)
     {
-        shotState++;
-        shotCounter++;
+        if (watchShots)
+        {        
+            shotState++;
+            shotCounter++;
+            watchShots = 0;
+        }
 
         if (shotState >= maxShots)
         {

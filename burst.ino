@@ -12,11 +12,14 @@ int lastGearState = 0;
 int lastTriggerState = 0;
 int gearState;
 int triggerState = 1;
+int resetState = 1;
 int shotState = 0;
 int shotCounter = 0;
 
 long lastTriggerTime = 0;
 long lastGearTime = 0;
+long lastResetTime = 0;
+long lastResetState = 0;
 long debounceDelay = 50;  
 long debounceDelayGear = 5;
 
@@ -28,6 +31,7 @@ void setup()
     pinMode(motorPin, OUTPUT);
     lastGearState = digitalRead(gearPin);
     lastTriggerState = digitalRead(triggerPin);
+    lastResetState = digitalRead(resetPin);
 }
 
 
@@ -35,7 +39,7 @@ void loop()
 {
     // debounce reset
     int resetReading = digitalRead(resetPin);
-    if (resetReading != lastResetrState) lastResetTime = millis();
+    if (resetReading != lastResetState) lastResetTime = millis();
     if ((millis() - lastResetTime) > debounceDelay) 
     {
         if (resetReading != resetState) resetState = resetReading;

@@ -18,12 +18,13 @@ int shotState = 0;
 long lastTriggerTime = 0;
 long lastGearTime = 0;
 
-long debounceDelay = 50;  
+long debounceDelay = 50;
 long debounceDelayGear = 1;
 int burstCount = 3;
 
 void setup()
 {
+  Serial.begin(9600);
   pinMode(triggerPin, INPUT_PULLUP);
   pinMode(selectorPin, INPUT_PULLUP);
   pinMode(gearPin, INPUT_PULLUP);
@@ -32,7 +33,7 @@ void setup()
   lastTriggerState = digitalRead(triggerPin);
 }
 
-void loop() 
+void loop()
 {
   if (digitalRead(selectorPin))
   {
@@ -49,9 +50,9 @@ void burstFire(int maxShots)
   // debounce gear
   bool gearReading = digitalRead(gearPin);
   if (gearReading != lastGearState) lastGearTime = millis();
-  if ((millis() - lastGearTime) > debounceDelayGear) 
+  if ((millis() - lastGearTime) > debounceDelayGear)
   {
-    if (gearReading != tempGearState) 
+    if (gearReading != tempGearState)
     {
       tempGearState = gearReading;
       gearState = !tempGearState;
@@ -61,11 +62,11 @@ void burstFire(int maxShots)
   // debounce trigger
   bool triggerReading = digitalRead(triggerPin);
   if (triggerReading != lastTriggerState) lastTriggerTime = millis();
-  if ((millis() - lastTriggerTime) > debounceDelay) 
+  if ((millis() - lastTriggerTime) > debounceDelay)
   {
-    if (triggerReading != tempTriggerState) 
+    if (triggerReading != tempTriggerState)
     {
-      tempTriggerState = triggerReading; 
+      tempTriggerState = triggerReading;
       triggerState = !tempTriggerState;
     }
   }
@@ -106,5 +107,7 @@ void burstFire(int maxShots)
 
   // debounce end
   lastTriggerState = triggerReading;
-  lastGearState = gearReading;   
+  lastGearState = gearReading;
+
+  Serial.println(shotState);
 }

@@ -12,7 +12,7 @@ int lastTriggerState = 0;
 bool tempGearState;
 bool gearState;
 bool tempTriggerState = 1;
-bool triggerState = 1;
+bool triggerState = 0;
 int shotState = 0;
 
 long lastTriggerTime = 0;

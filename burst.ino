@@ -1,139 +1,90 @@
-#define triggerPin 3
-#define selectorPin 4
-#define gearPin 5
-#define motorPin 6
-#define resetPin 7
-#define ledPin 13
+#define trigger 3
+#define semi 4
+#define gear 5
+#define motor 6
+#define reset 7
+#define led 13
+#define ACTIVE LOW
 
-bool ignoreTrigger = 0;
-bool ignoreGear = 1;
-bool runMotor = 0;
-bool watchShots = 1;
-int lastGearState = 0;
-int lastTriggerState = 0;
-int gearState;
-int triggerState = 1;
-int resetState = 1;
-int shotState = 0;
-int shotCounter = 0;
+enum state {
+    initialized,
+    pending,
+    firing,
+    completed
+};
 
-long lastTriggerTime = 0;
-long lastGearTime = 0;
-long lastResetTime = 0;
-long lastResetState = 0;
-long debounceDelay = 50;  
-long debounceDelayGear = 1;
+state cycleState = pending;
 
 void setup()
 {
-    pinMode(triggerPin, INPUT_PULLUP);
-    pinMode(selectorPin, INPUT_PULLUP);
-    pinMode(gearPin, INPUT_PULLUP);
-    pinMode(motorPin, OUTPUT);
-    pinMode(resetPin, INPUT_PULLUP);
-    lastGearState = digitalRead(gearPin);
-    lastTriggerState = digitalRead(triggerPin);
-    lastResetState = digitalRead(resetPin);
+    pinMode(trigger, INPUT_PULLUP);
+    pinMode(semi, INPUT_PULLUP);
+    pinMode(gear, INPUT_PULLUP);
+    pinMode(motor, OUTPUT);
+    pinMode(reset, INPUT_PULLUP);
+    setMotor(0);
 }
 
 
 void loop() 
 {
-    // debounce reset
-    int resetReading = digitalRead(resetPin);
-    if (resetReading != lastResetState) lastResetTime = millis();
-    if ((millis() - lastResetTime) > debounceDelay) 
+    if (cycleState == initialized)
     {
-        if (resetReading != resetState) resetState = resetReading;
-    }
-
-    if (!resetState)
-    {
-        shotCounter = 0;
-    }
-
-    if (digitalRead(selectorPin))
-    {
-        burstFire(1);
+        if (digitalRead(trigger) == ACTIVE)
+        {
+            cycleState = pending;
+        }
+        else
+        {
+            setMotor(0);
+        }
     }
     else
     {
-        burstFire(3);
+        if (digitalRead(semi) == ACTIVE)
+        {
+            shootOnce();
+        }
+        else
+        {
+            //Burst 'n shit
+        }
     }
 
-    lastResetState = resetReading; 
 }
 
-void burstFire(int maxShots)
+void shootOnce()
 {
-    // debounce gear
-    int gearReading = digitalRead(gearPin);
-    if (gearReading != lastGearState) lastGearTime = millis();
-    if ((millis() - lastGearTime) > debounceDelayGear) 
+    if (digitalRead(trigger) == ACTIVE)
     {
-        if (gearReading != gearState) gearState = gearReading;
-    }
-
-    // debounce trigger
-    int triggerReading = digitalRead(triggerPin);
-    if (triggerReading != lastTriggerState) lastTriggerTime = millis();
-    if ((millis() - lastTriggerTime) > debounceDelay) 
-    {
-        if (triggerReading != triggerState) triggerState = triggerReading; 
-    }
-
-    // if gear is not detected commence watching gear
-    if (gearState) 
-    {
-        ignoreGear = 0;
-        watchShots = 1;
-    } 
-
-    // if trigger is held and is not ignored
-    if (!ignoreTrigger and !triggerState)
-    {
-        // start motor and stop watching the trigger
-        runMotor = 1;
-        shotState = 0;
-        watchShots = 1;
-        ignoreTrigger = 1;
-    }
-
-    // if gear is detected and not ignored
-    if (!gearState and !ignoreGear)
-    {
-        if (watchShots)
-        {        
-            shotState++;
-            shotCounter++;
-            watchShots = 0;
-        }
-
-        if (shotState >= maxShots)
+        if (cycleState == pending)
         {
-            // stop the motor
-            runMotor = 0;
-            shotState = 0;
-
-            // if trigger is released
-            if (triggerState)
-            {
-                // start watching the trigger and ignore the gear
-                ignoreTrigger = 0;
-                ignoreGear = 1;
-            }
+            cycleState = firing
         }
     }
-    else // in all other cases
+    else
     {
-        // if trigger is released
-        if (triggerState) ignoreTrigger = 0; 
+        cycleState = pending
     }
 
-    digitalWrite(motorPin, runMotor);
-    digitalWrite(ledPin, runMotor);
+    if (digitalRead(gear) == ACTIVE and digitalRead(trigger) == ACTIVE)
+    {
+        cycleState = completed
+    }
 
-    // debounce end
-    lastTriggerState = triggerReading;
-    lastGearState = gearReading;   
+    if (cycleState == firing)
+    {
+        setMotor(1)
+    }
+
+    if (cycleState == completed)
+    {
+        setMotor(0)
+    }
+}
+
+void setMotor(bool status)
+{
+    digitalWrite(motor, status);
+    ditigalWrite(led, status);
 }

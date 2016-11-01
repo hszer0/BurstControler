@@ -25,7 +25,6 @@ void setup()
     setMotor(0);
 }
 
-
 void loop() 
 {
     if (cycleState == initialized)
@@ -50,7 +49,6 @@ void loop()
             //Burst 'n shit
         }
     }
-
 }
 
 void shootOnce()

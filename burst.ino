@@ -5,6 +5,7 @@
 #define reset 7
 #define led 13
 #define ACTIVE LOW
+#define INACTIVE HIGH
 
 enum state {
     initialized,
@@ -59,7 +60,7 @@ void shootOnce()
             cycleState = firing;
     }
 
-    if (cycleState == completed && digitalRead(trigger) != ACTIVE)
+    if (cycleState == completed && digitalRead(trigger) == INACTIVE)
         cycleState == pending;
 
     if (digitalRead(gear) == ACTIVE)

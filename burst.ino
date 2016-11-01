@@ -57,20 +57,20 @@ void shootOnce()
     if (digitalRead(trigger) == ACTIVE)
     {
         if (cycleState == pending)
+        {
             cycleState = firing;
+            setMotor(1);
+        }
     }
 
     if (cycleState == completed && digitalRead(trigger) == INACTIVE)
         cycleState == pending;
 
     if (digitalRead(gear) == ACTIVE)
+    {
         cycleState = completed;
-
-    if (cycleState == firing)
-        setMotor(1);
-
-    if (cycleState == completed)
         setMotor(0);
+    }
 }
 
 void setMotor(bool status)

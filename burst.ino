@@ -76,5 +76,5 @@ void shootOnce()
 void setMotor(bool status)
 {
     digitalWrite(motor, status);
-    ditigalWrite(led, status);
+    digitalWrite(led, status);
 }

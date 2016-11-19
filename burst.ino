@@ -14,7 +14,7 @@ enum state {
     completed
 };
 
-state cycleState = pending;
+state cycleState = initialized;
 
 void setup()
 {
